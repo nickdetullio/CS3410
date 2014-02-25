@@ -21,6 +21,11 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="valign" val="base"/>
     </tool>
   </lib>
+  <lib desc="jar#/Users/Nick/Documents/GitHub/CS3410/cs3410.jar#edu.cornell.cs3410.Components" name="7">
+    <tool name="MIPSProgramROM">
+      <a name="contents" val=""/>
+    </tool>
+  </lib>
   <main name="main"/>
   <options>
     <a name="gateUndefined" val="ignore"/>
