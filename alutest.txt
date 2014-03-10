@@ -494,3 +494,42 @@ lui $1, 8192
 lui $1, 16384
 lui $1, 32768
 
+j 16
+jal  32
+addiu $2, $0, 4
+jalr $1, $2
+jr $2
+
+addiu $1, $0, 4
+beq $0, $0, 16
+beq $0, $1, 16
+bne $0, $0, 16
+bne $0, $1, 16
+
+addiu $1, $0, 4
+nor $2, $0, $0
+blez $0, 8
+blez $1, 16
+blez $2, 32
+bgtz $0, 8
+bgtz $1, 16
+bgtz $2, 32
+bltz $0, 8
+bltz $1, 16
+bltz $2, 32
+bgez $0, 8
+bgez $1, 16
+bgez $2, 32
+
+lw $1, 16($0)
+lb $1, 16($0)
+lbu $1, 16($0)
+addiu $2, $0, 4
+sw $2, 2($0)
+sb $2, 2($0)
+
+addiu $1, $0, 4
+lui $3, 1
+lui $4, 2
+sll $4, $4, 2 #ex to ex forwarding
+addu $4, $4, $3 #mem to ex forwarding ($4) and register file bypass ($3)
