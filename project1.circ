@@ -359,6 +359,7 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <wire from="(790,390)" to="(840,390)"/>
     <wire from="(580,280)" to="(590,280)"/>
     <wire from="(610,320)" to="(650,320)"/>
+    <wire from="(1310,360)" to="(1360,360)"/>
     <wire from="(610,340)" to="(610,360)"/>
     <wire from="(1180,400)" to="(1190,400)"/>
     <wire from="(470,190)" to="(470,230)"/>
@@ -389,7 +390,6 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <wire from="(870,370)" to="(900,370)"/>
     <wire from="(790,410)" to="(790,420)"/>
     <wire from="(970,330)" to="(990,330)"/>
-    <wire from="(1290,240)" to="(1320,240)"/>
     <wire from="(560,370)" to="(620,370)"/>
     <wire from="(1020,400)" to="(1020,560)"/>
     <wire from="(490,260)" to="(490,320)"/>
@@ -424,7 +424,6 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <wire from="(770,240)" to="(830,240)"/>
     <wire from="(770,300)" to="(800,300)"/>
     <wire from="(620,360)" to="(620,370)"/>
-    <wire from="(1310,360)" to="(1320,360)"/>
     <wire from="(890,360)" to="(900,360)"/>
     <wire from="(870,380)" to="(1010,380)"/>
     <wire from="(560,380)" to="(630,380)"/>
@@ -439,7 +438,6 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <wire from="(650,280)" to="(650,320)"/>
     <wire from="(240,320)" to="(320,320)"/>
     <wire from="(900,330)" to="(900,360)"/>
-    <wire from="(1320,360)" to="(1360,360)"/>
     <wire from="(470,340)" to="(530,340)"/>
     <wire from="(1050,320)" to="(1050,350)"/>
     <wire from="(1310,370)" to="(1340,370)"/>
@@ -493,7 +491,6 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <wire from="(1110,360)" to="(1130,360)"/>
     <wire from="(1110,310)" to="(1110,360)"/>
     <wire from="(1090,370)" to="(1130,370)"/>
-    <wire from="(1320,240)" to="(1320,360)"/>
     <wire from="(540,440)" to="(540,560)"/>
     <wire from="(470,280)" to="(480,280)"/>
     <wire from="(80,310)" to="(80,360)"/>
@@ -501,7 +498,6 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <wire from="(820,300)" to="(840,300)"/>
     <wire from="(1050,350)" to="(1060,350)"/>
     <wire from="(320,560)" to="(320,580)"/>
-    <wire from="(780,140)" to="(780,360)"/>
     <wire from="(750,440)" to="(800,440)"/>
     <wire from="(230,360)" to="(230,370)"/>
     <wire from="(470,230)" to="(470,240)"/>
@@ -639,7 +635,6 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="width" val="4"/>
       <a name="label" val="Op"/>
     </comp>
-    <comp lib="0" loc="(780,140)" name="Probe"/>
     <comp lib="0" loc="(1170,370)" name="Tunnel">
       <a name="width" val="32"/>
       <a name="label" val="m"/>
@@ -800,17 +795,25 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="label" val="Mem"/>
     </comp>
     <comp lib="0" loc="(960,480)" name="Probe"/>
-    <comp lib="0" loc="(1290,240)" name="Probe"/>
     <comp loc="(1160,350)" name="MEM/WB">
       <a name="label" val="MEM/WB"/>
     </comp>
     <comp lib="7" loc="(310,250)" name="MIPSProgramROM">
-      <a name="contents">addiu $1, $0, 1
-sltu $2, $1, $0
-sltu $2, $0, $1
-nor $1, $0, $0
-sltu $2, $1, $0
-sltu $2, $0, $1
+      <a name="contents">lui $1, 1
+lui $1, 2
+lui $1, 4
+lui $1, 8
+lui $1, 16
+lui $1, 32
+lui $1, 64
+lui $1, 128
+lui $1, 256
+lui $1, 512
+lui $1, 1024
+lui $1, 2048
+lui $1, 4096
+lui $1, 8192
+lui $1, 16384
 </a>
     </comp>
     <comp lib="0" loc="(820,340)" name="Tunnel">
@@ -1090,6 +1093,7 @@ sltu $2, $0, $1
     <a name="clabelup" val="east"/>
     <a name="clabelfont" val="SansSerif plain 12"/>
     <wire from="(330,590)" to="(330,810)"/>
+    <wire from="(410,270)" to="(410,310)"/>
     <wire from="(730,350)" to="(730,560)"/>
     <wire from="(710,90)" to="(710,100)"/>
     <wire from="(610,750)" to="(650,750)"/>
@@ -1111,6 +1115,7 @@ sltu $2, $0, $1
     <wire from="(620,300)" to="(630,300)"/>
     <wire from="(250,620)" to="(320,620)"/>
     <wire from="(470,750)" to="(470,780)"/>
+    <wire from="(430,270)" to="(450,270)"/>
     <wire from="(320,430)" to="(380,430)"/>
     <wire from="(610,280)" to="(620,280)"/>
     <wire from="(550,270)" to="(550,300)"/>
@@ -1143,6 +1148,7 @@ sltu $2, $0, $1
     <wire from="(330,590)" to="(460,590)"/>
     <wire from="(690,140)" to="(710,140)"/>
     <wire from="(340,730)" to="(340,810)"/>
+    <wire from="(420,230)" to="(420,240)"/>
     <wire from="(640,150)" to="(660,150)"/>
     <wire from="(340,660)" to="(340,730)"/>
     <wire from="(350,650)" to="(390,650)"/>
@@ -1200,7 +1206,6 @@ sltu $2, $0, $1
     <wire from="(340,890)" to="(340,920)"/>
     <wire from="(320,560)" to="(360,560)"/>
     <wire from="(360,560)" to="(360,640)"/>
-    <wire from="(410,260)" to="(410,310)"/>
     <wire from="(320,550)" to="(370,550)"/>
     <wire from="(730,560)" to="(770,560)"/>
     <wire from="(320,620)" to="(320,670)"/>
@@ -1236,12 +1241,6 @@ sltu $2, $0, $1
       <a name="facing" val="west"/>
       <a name="output" val="true"/>
       <a name="label" val="IsR"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="0" loc="(410,260)" name="Pin">
-      <a name="facing" val="south"/>
-      <a name="output" val="true"/>
-      <a name="label" val="whichSA"/>
       <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(660,100)" name="Tunnel">
@@ -1297,6 +1296,11 @@ sltu $2, $0, $1
       <a name="facing" val="north"/>
       <a name="label" val="Is Mem"/>
     </comp>
+    <comp lib="1" loc="(420,240)" name="AND Gate">
+      <a name="facing" val="north"/>
+      <a name="size" val="30"/>
+      <a name="inputs" val="2"/>
+    </comp>
     <comp lib="0" loc="(240,240)" name="Pin">
       <a name="width" val="32"/>
       <a name="tristate" val="false"/>
@@ -1346,6 +1350,9 @@ sltu $2, $0, $1
       <a name="negate2" val="true"/>
       <a name="negate3" val="true"/>
     </comp>
+    <comp lib="0" loc="(450,270)" name="Tunnel">
+      <a name="label" val="IsR"/>
+    </comp>
     <comp lib="0" loc="(530,190)" name="Tunnel">
       <a name="facing" val="south"/>
       <a name="label" val="Is JR"/>
@@ -1379,6 +1386,12 @@ sltu $2, $0, $1
       <a name="fanout" val="5"/>
       <a name="incoming" val="5"/>
       <a name="appear" val="center"/>
+    </comp>
+    <comp lib="0" loc="(420,230)" name="Pin">
+      <a name="facing" val="south"/>
+      <a name="output" val="true"/>
+      <a name="label" val="whichSA"/>
+      <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(340,920)" name="Tunnel">
       <a name="facing" val="north"/>
@@ -1513,6 +1526,7 @@ sltu $2, $0, $1
     <wire from="(1020,420)" to="(1020,440)"/>
     <wire from="(1500,80)" to="(1530,80)"/>
     <wire from="(940,200)" to="(940,210)"/>
+    <wire from="(1230,40)" to="(1230,50)"/>
     <wire from="(310,330)" to="(440,330)"/>
     <wire from="(960,80)" to="(1020,80)"/>
     <wire from="(1360,190)" to="(1360,220)"/>
@@ -1566,8 +1580,8 @@ sltu $2, $0, $1
     <wire from="(1210,140)" to="(1210,190)"/>
     <wire from="(1060,300)" to="(1160,300)"/>
     <wire from="(850,490)" to="(880,490)"/>
-    <wire from="(850,250)" to="(850,320)"/>
     <wire from="(1080,260)" to="(1080,340)"/>
+    <wire from="(850,250)" to="(850,320)"/>
     <wire from="(480,470)" to="(480,480)"/>
     <wire from="(1060,80)" to="(1080,80)"/>
     <wire from="(1190,190)" to="(1210,190)"/>
@@ -1620,6 +1634,10 @@ sltu $2, $0, $1
       <a name="width" val="32"/>
       <a name="tristate" val="false"/>
       <a name="label" val="Immediate"/>
+    </comp>
+    <comp lib="0" loc="(1230,40)" name="Tunnel">
+      <a name="facing" val="south"/>
+      <a name="label" val="ALU02"/>
     </comp>
     <comp lib="0" loc="(1440,50)" name="Tunnel">
       <a name="facing" val="north"/>
@@ -1767,10 +1785,6 @@ sltu $2, $0, $1
       <a name="facing" val="north"/>
       <a name="label" val="2nd bit"/>
     </comp>
-    <comp lib="0" loc="(1230,50)" name="Tunnel">
-      <a name="facing" val="south"/>
-      <a name="label" val="ALU02"/>
-    </comp>
     <comp lib="2" loc="(1310,330)" name="Multiplexer">
       <a name="selloc" val="tr"/>
       <a name="select" val="2"/>
@@ -1858,6 +1872,9 @@ sltu $2, $0, $1
     <comp lib="0" loc="(120,470)" name="Pin">
       <a name="tristate" val="false"/>
       <a name="label" val="Ex/Mem.WE"/>
+    </comp>
+    <comp lib="0" loc="(1060,490)" name="Probe">
+      <a name="facing" val="west"/>
     </comp>
     <comp lib="0" loc="(1210,320)" name="Tunnel">
       <a name="facing" val="east"/>

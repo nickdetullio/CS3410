@@ -373,3 +373,124 @@ sltu $2, $0, $1
 nor $1, $0, $0
 sltu $2, $1, $0
 sltu $2, $0, $1
+
+addiu $1, $0, 2
+addiu $2, $0, 4
+movn $1, $2, $0
+movn $1, $2, $1
+
+addiu $1, $0, 2
+addiu $2, $0, 4
+movz $1, $2, $0
+addiu $2, $0, 2
+movz $1, $2, $1
+
+addiu $1, $0, 1
+sll $2, $1, 1
+sll $2, $1, 2
+sll $2, $1, 4
+sll $2, $1, 8
+sll $2, $1, 16
+sll $2, $1, 31
+nor $1, $0, $0
+sll $2, $1, 1
+sll $2, $1, 2
+sll $2, $1, 4
+sll $2, $1, 8
+sll $2, $1, 16
+sll $2, $1, 31
+
+addiu $1, $0, 1
+addiu $2, $0, 4
+srl $2, $1, 1
+nor $1, $0, $0
+srl $2, $1, 1
+srl $2, $1, 2
+srl $2, $1, 4
+srl $2, $1, 8
+srl $2, $1, 16
+srl $2, $1, 31
+
+addiu $1, $0, 1
+addiu $2, $0, 4
+sra $2, $1, 1
+nor $1, $0, $0
+sra $2, $1, 1
+
+addiu $1, $0, 1
+addiu $2, $0, 1
+sllv $3, $1, $2
+addiu $2, $0, 2
+sllv $3, $1, $2
+addiu $2, $0, 4
+sllv $3, $1, $2
+addiu $2, $0, 8
+sllv $3, $1, $2
+addiu $2, $0, 16
+sllv $3, $1, $2
+addiu $2, $0, 31
+sllv $3, $1, $2
+nor $1, $0, $0
+addiu $2, $0, 1
+sllv $3, $1, $2
+addiu $2, $0, 2
+sllv $3, $1, $2
+addiu $2, $0, 4
+sllv $3, $1, $2
+addiu $2, $0, 8
+sllv $3, $1, $2
+addiu $2, $0, 16
+sllv $3, $1, $2
+addiu $2, $0, 31
+sllv $3, $1, $2
+
+addiu $1, $0, 1
+addiu $2, $0, 1
+srlv $3, $1, $2
+nor $1, $0, $0
+addiu $2, $0, 1
+srlv $3, $1, $2
+addiu $2, $0, 2
+srlv $3, $1, $2
+addiu $2, $0, 4
+srlv $3, $1, $2
+addiu $2, $0, 8
+srlv $3, $1, $2
+addiu $2, $0, 16
+srlv $3, $1, $2
+addiu $2, $0, 31
+srlv $3, $1, $2
+
+addiu $1, $0, 1
+addiu $2, $0, 1
+srav $3, $1, $2
+nor $1, $0, $0
+srav $3, $1, $2
+addiu $2, $0, 2
+srav $3, $1, $2
+addiu $2, $0, 4
+srav $3, $1, $2
+addiu $2, $0, 8
+srav $3, $1, $2
+addiu $2, $0, 16
+srav $3, $1, $2
+addiu $2, $0, 31
+srav $3, $1, $2
+
+lui $1, 1
+lui $1, 2
+lui $1, 4
+lui $1, 8
+lui $1, 16
+lui $1, 32
+lui $1, 64
+lui $1, 128
+lui $1, 256
+lui $1, 512
+lui $1, 1024
+lui $1, 2048
+lui $1, 4096
+lui $1, 8192
+lui $1, 16384
+lui $1, 32768
+
