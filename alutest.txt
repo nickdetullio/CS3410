@@ -602,3 +602,13 @@ addu $3, $2, $0
 subu $3, $3, $2
 lui $3, 1
 or $3, $2, $1
+
+#Series of Table B Instructions
+addiu $1, $0, 1
+sw $1, 0($0)
+lw $2, 0($0)
+
+addiu $1, $0, 128
+sb $1, 1($0)
+lb $2, 1($0)
+lbu $2, 1($0)
