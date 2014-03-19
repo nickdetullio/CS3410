@@ -450,10 +450,10 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="label" val="MEM/WB"/>
     </comp>
     <comp lib="7" loc="(340,250)" name="MIPSProgramROM">
-      <a name="contents">addiu $1, $0, 1
-sll $1, $1, 9
+      <a name="contents">addiu $1, $0, 128
 sb $1, 1($0)
-lw $2, 0($0)
+lb $2, 1($0)
+lbu $2, 1($0)
 </a>
     </comp>
     <comp lib="0" loc="(710,240)" name="Probe">
