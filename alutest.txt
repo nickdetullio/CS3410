@@ -791,3 +791,14 @@ SLL $1, $0, 0
 SLL $1, $0, 0
 SLL $1, $0, 0
 TEST: SLL $1, $1, 2
+
+#test of zap for branches
+NOR $1, $0, $0
+BLEZ $1, TEST
+SLL $0, $0, 0
+SLL $1, $1, 1
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $2, $1, 2
