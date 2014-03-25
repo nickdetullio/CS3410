@@ -1,0 +1,25 @@
+START: ADDIU $t0, $0, 1
+$ADDIU $t1, $a0, 0
+BEQ $t1, $t0, EXIT
+ADDIU $v0, $0, 0
+ANDI $t1, $t1, 1
+BEQ $t1, $t0, EXIT2
+SLL $0, $0, 0
+
+ADDU $a0, $t1, $t1
+ADDU $a0, $a0, $t1
+ADDIU $v0, $a0, 1
+J START
+SLL $0, $0, 0
+ADDIU $v0, $v0, 1
+J EXIT
+
+EXIT: JR $31
+
+EXIT2: SRA $a0, $t1, 1
+J START
+SLL $0, $0, 0
+ADDIU $v0, $v0, 1
+J EXIT
+
+

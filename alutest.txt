@@ -627,3 +627,167 @@ sll $0, $0, 0
 sll $0, $0, 0
 sll $0, $0, 0
 JALR $2, $1
+
+ADDIU $1, $0, 32
+ADDIU $2, $0, 32
+BEQ $1, $2, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+ADDIU $1, $0, 32
+ADDIU $2, $0, 16
+BEQ $1, $2, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+ADDIU $1, $0, 32
+ADDIU $2, $0, 16
+BNE $1, $2, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+ADDIU $1, $0, 32
+ADDIU $2, $0, 32
+BNE $1, $2, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+ADDIU $1, $0, 32
+BLTZ $1, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+NOR $1, $0, $0
+BLTZ $1, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+ADDIU $1, $0, 0
+BLTZ $1, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+ADDIU $1, $0, 32
+BGTZ $1, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+ADDIU $1, $0, 0
+BGTZ $1, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+NOR $1, $0, $0
+BGTZ $1, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+ADDIU $1, $0, 32
+BGEZ $1, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+ADDIU $1, $0, 0
+BGEZ $1, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+NOR $1, $0, $0
+BGEZ $1, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+ADDIU $1, $0, 32
+BLEZ $1, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+ADDIU $1, $0, 0
+BLEZ $1, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
+
+NOR $1, $0, $0
+BLEZ $1, TEST
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+SLL $1, $0, 0
+TEST: SLL $1, $1, 2
