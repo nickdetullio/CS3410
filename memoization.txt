@@ -1,0 +1,52 @@
+int m_hailstone(int n, int A[], int s) {
+        if (n < s && A[n] != 0) return A[n]; /* computed this one before */
+        if (n == 1) return 0;
+        else {
+            int i;
+            if ((n % 2) == 0) i = 1 + m_hailstone(n/2, A, s);
+            else i = 1 + m_hailstone(3*n+1, A, s);
+            if (n < s) A[n] = i; /* save this answer for reuse later */
+            return i;
+        }
+    }
+
+ADDIU $v0, $0, 0
+
+START: ADDIU $t0, $0, 0
+ADDIU $t1, $0, 1
+ADDIU $t2, $a0, 0
+LW $t3, $t2($a1)
+ADDIU $t4, $a2, 0
+SUB $t5, $t4, $t2
+
+BNE $t3, $0, COND
+SLL $0, $0, 0 
+
+BEQ $t2, $t1, EXIT2
+SLL $0, $0, 0
+
+ANDI $t2, $t2, 1
+BEQ $t2, $t0, EXIT3
+
+EXIT: ADDIU $v0, $t3, 0
+JR $31
+
+EXIT2: ADDIU $v0, $0, 0
+JR $31
+
+EXIT3: SRA $a0, $t2, 1
+ADDIU $v0, $a0, 0
+J START
+SLL $0, $0, 0
+ADDIU $v0, $v0, 1
+J COND2
+SLL $0, $0, 0
+
+EXIT4: SW $v0, $t2($a1)
+JR $31
+
+COND: BLTZ $t5, EXIT
+SLL $0, $0, 0
+
+COND2: BLTZ $t5, EXIT4
+SLL $0, $0, 0

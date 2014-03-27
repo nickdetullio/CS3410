@@ -1,0 +1,36 @@
+int i_hailstone(int n) {
+        int i = 0;
+        while (n != 1) {
+            i = i + 1;
+            if ((n % 2) == 0)
+                n = n/2;
+            else
+                n = 3*n+1;
+        }
+        return i;
+    }
+
+ADDIU $t0, $0, 1
+ADDIU $t1, $a0, 0
+ADDIU $v0, $0, 0
+
+START: BEQ $t0, $a0, EXIT
+SLL $0, $0, 0
+
+ADDIU $v0, $v0, 1
+
+ANDI $t1, $t1, 1
+BEQ $t1, $t0, EXIT2
+SLL $0, $0, 0
+
+ADDU $a0, $t1, $t1
+ADDU $a0, $a0, $t1
+ADDIU $a0, $a0, 1
+J START
+SLL $0, $0, 0
+
+EXIT: JR $31
+
+EXIT2: SRA $a0, $a0, 1
+J START
+SLL $0, $0, 0
