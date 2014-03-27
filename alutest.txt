@@ -655,11 +655,30 @@ sb $1, 1($0)
 lb $2, 1($0)
 lbu $2, 1($0)
 
-#a test of the load/use hazard
+#a test of the load/use hazard with immediate instruction
 addiu $1, $0, 128
 sb $1, 1($0)
 lb $2, 1($0)
 addiu $3, $2, 0
+
+#a test of false load/use hazard with immediate instruction
+addiu $1, $0, 128
+sb $1, 1($0)
+lb $2, 1($0)
+addiu $0, $2, 0
+
+#a test of the load/use hazard with register instruction
+addiu $1, $0, 128
+sb $1, 1($0)
+lb $2, 1($0)
+addu $3, $2, $0
+
+#a test of false load/use hazard with register instruction
+addiu $1, $0, 128
+sb $1, 1($0)
+lb $2, 1($0)
+addu $0, $2, $0
+
 
 #a test of j
 ADDIU $1, $0, 1
@@ -675,15 +694,67 @@ JAL LP1
 SLL $1, $1, 1
 SLL $1, $1, 1
 
-#a test of jr
+#a test of jr without hazards
+ADDIU $1, $0, 32
+SLL $0, $0, 0
+SLL $0, $0, 0
+SLL $0, $0, 0
+SLL $0, $0, 0
+JR $1
+SLL $1, $1, 1
+SLL $1, $1, 1
+
+#a test of jr with hazard in execute stage
 ADDIU $1, $0, 32
 JR $1
 SLL $1, $1, 1
 SLL $1, $1, 1
 
-#a test of jalr
+#a test of jr with hazard in memory stage
+#should introduce one stall
 ADDIU $1, $0, 32
+SLL $0, $0, 0
+JR $1
+SLL $1, $1, 1
+SLL $1, $1, 1
+
+#a test of jr with hazard in writeback stage
+ADDIU $1, $0, 32
+SLL $0, $0, 0
+SLL $0, $0, 0
+JR $1
+SLL $1, $1, 1
+SLL $1, $1, 1
+
+#a test of jalr without hazards
+ADDIU $1, $0, 32
+SLL $0, $0, 0
+SLL $0, $0, 0
+SLL $0, $0, 0
+SLL $0, $0, 0
 JALR $2, $1
+SLL $1, $1, 1
+SLL $1, $1, 1
+
+#a test of jalr with hazard in execute stage
+ADDIU $1, $0, 32
+JALR $1
+SLL $1, $1, 1
+SLL $1, $1, 1
+
+#a test of jalr with hazard in memory stage
+#should introduce one stall
+ADDIU $1, $0, 32
+SLL $0, $0, 0
+JALR $1
+SLL $1, $1, 1
+SLL $1, $1, 1
+
+#a test of jalr with hazard in writeback stage
+ADDIU $1, $0, 32
+SLL $0, $0, 0
+SLL $0, $0, 0
+JALR $1
 SLL $1, $1, 1
 SLL $1, $1, 1
 
@@ -693,6 +764,8 @@ ADDIU $2, $0, 32
 BEQ $1, $2, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of beq with unequal registers
@@ -701,6 +774,8 @@ ADDIU $2, $0, 16
 BEQ $1, $2, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of bne with unequal registers
@@ -709,6 +784,8 @@ ADDIU $2, $0, 16
 BNE $1, $2, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of bne with equal registers
@@ -717,6 +794,8 @@ ADDIU $2, $0, 32
 BNE $1, $2, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of bltz with a positive register value
@@ -724,6 +803,8 @@ ADDIU $1, $0, 32
 BLTZ $1, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of bltz with a negative register value
@@ -731,6 +812,8 @@ NOR $1, $0, $0
 BLTZ $1, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of bltz with a zero register value
@@ -738,6 +821,8 @@ ADDIU $1, $0, 0
 BLTZ $1, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of bgtz with a positive register value
@@ -745,6 +830,8 @@ ADDIU $1, $0, 32
 BGTZ $1, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of bgtz with a zero register value
@@ -752,6 +839,8 @@ ADDIU $1, $0, 0
 BGTZ $1, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of bgtz with a negative register value
@@ -759,6 +848,8 @@ NOR $1, $0, $0
 BGTZ $1, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of bgez with a positive register value
@@ -766,6 +857,8 @@ ADDIU $1, $0, 32
 BGEZ $1, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of bgez with a zero register value
@@ -773,6 +866,8 @@ ADDIU $1, $0, 0
 BGEZ $1, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of bgez with a negative register value
@@ -780,6 +875,8 @@ NOR $1, $0, $0
 BGEZ $1, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of blez with a positive register value
@@ -787,6 +884,8 @@ ADDIU $1, $0, 32
 BLEZ $1, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of blez with a zero register value
@@ -794,6 +893,8 @@ ADDIU $1, $0, 0
 BLEZ $1, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
 #a test of blez with a negative register value
@@ -801,9 +902,11 @@ NOR $1, $0, $0
 BLEZ $1, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
 TEST: SLL $1, $1, 2
 
-#test of zap for blez
+#test of zap for branches
 NOR $1, $0, $0
 BLEZ $1, TEST
 SLL $1, $1, 1
@@ -813,6 +916,27 @@ SLL $1, $1, 1
 SLL $1, $1, 1
 SLL $1, $1, 1
 TEST: SLL $2, $1, 2
+
+#a test of data hazards in memory for branches
+NOR $1, $0, $0
+SLL $0, $0, 0
+BLEZ $1, TEST
+SLL $1, $1, 1
+SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
+TEST: SLL $1, $1, 2
+
+#a test of data hazards in writeback for branches
+NOR $1, $0, $0
+SLL $0, $0, 0
+SLL $0, $0, 0
+BLEZ $1, TEST
+SLL $1, $1, 1
+SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
+TEST: SLL $1, $1, 2
 
 #Series of Tests for Hazards
 

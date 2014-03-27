@@ -1,6 +1,9 @@
-ADDIU $1, $0, 32
+NOR $1, $0, $0
 SLL $0, $0, 0
 SLL $0, $0, 0
-JR $1
+BLEZ $1, TEST
 SLL $1, $1, 1
 SLL $1, $1, 1
+SLL $0, $0, 0
+SLL $0, $0, 0
+TEST: SLL $1, $1, 2
