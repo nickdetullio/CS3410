@@ -10,27 +10,27 @@ int i_hailstone(int n) {
         return i;
     }
 
-ADDIU $t0, $0, 1
-ADDIU $t1, $a0, 0
-ADDIU $v0, $0, 0
+ADDIU $t0, $0, 1			#set temp register $t0 to 1 for conditionals
+ADDIU $t1, $a0, 0			#set temp register $t1 to argument n
+ADDIU $v0, $0, 0			#set return value i at register $v0 to 0
 
-START: BEQ $t0, $a0, EXIT
-SLL $0, $0, 0
+START: BEQ $t0, $a0, EXIT		#branch to EXIT if n == 1
+       SLL $0, $0, 0			#delay slot for BEQ
 
-ADDIU $v0, $v0, 1
+ADDIU $v0, $v0, 1			#increment i
 
-ANDI $t1, $t1, 1
-BEQ $t1, $t0, EXIT2
-SLL $0, $0, 0
+ANDI $t2, $t1, 1			#ANDI of n and 1 for modulo arithmetic stored in $t2
+BEQ $t2, $t1, EXIT2			#branch to EXIT2 if (n % 2) == 0
+SLL $0, $0, 0				#delay slot for BEQ
 
-ADDU $a0, $t1, $t1
+ADDU $a0, $t1, $t1			#argument n set to 3n + 1
 ADDU $a0, $a0, $t1
 ADDIU $a0, $a0, 1
-J START
-SLL $0, $0, 0
+J START					#jump to start for next iteration
+SLL $0, $0, 0				#delay slot for J
 
-EXIT: JR $31
+EXIT: JR $31				#JR 31 to return value of i in $v0
 
-EXIT2: SRA $a0, $a0, 1
-J START
-SLL $0, $0, 0
+EXIT2: SRA $a0, $a0, 1			#argument n set to n/2
+       J START				#jump to start for next iteration
+       SLL $0, $0, 0			#delay slot for J
