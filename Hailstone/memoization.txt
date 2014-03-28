@@ -1,23 +1,18 @@
-int m_hailstone(int n, int A[], int s) {
-        if (n < s && A[n] != 0) return A[n]; /* computed this one before */
-        if (n == 1) return 0;
-        else {
-            int i;
-            if ((n % 2) == 0) i = 1 + m_hailstone(n/2, A, s);
-            else i = 1 + m_hailstone(3*n+1, A, s);
-            if (n < s) A[n] = i; /* save this answer for reuse later */
-            return i;
-        }
-    }
-
-ADDIU $t0, $0, 0			#set temp register $t0 to 0 for conditionals
-ADDIU $t1, $0, 1			#set temp register $t1 to 1 for conditionals
-
-HAIL: ADDIU $t2, $a0, 0			#set temp register $t2 to argument n
+HAIL: ADDIU $t0, $0, 0			#set temp register $t0 to 0 for conditionals
+      ADDIU $t1, $0, 1			#set temp register $t1 to 1 for conditionals
+      ADDIU $t2, $a0, 0			#set temp register $t2 to argument n
       SLL $t6, $t2, 2			#set temp register $t6 to array index n
-      LW $t3, $t6($a1)			#set temp register $t3 to A[n] 
+      ADDU $t9, $t6, $a1 		#set temp register $t9 to A[] + n
+      LW $t3, 0($t9)			#set temp register $t3 to A[n] 
       ADDIU $t4, $a2, 0			#set temp register $t4 to s
       SUB $t5, $t2, $t4			#store result of n - s in temp register $t5
+      ADDIU $sp, $sp, -24		#allocate stack frame
+      SW $ra, 20($sp)			#store $ra to stack
+      SW $fp, 16($sp)			#store $fp to stack
+      SW $a0, 12($sp)			#store $a0 to stack
+      SW $a1, 8($sp)			#store $a1 to stack
+      SW $a2, 4($sp)			#store $a2 to stack
+      ADDIU $fp, $sp, 20		#resize $fp
 
       SLT $t7, $0, $t3			#a check if A[n] != 0
       SLTI $t8, $t5, 0			#a check if n < s
@@ -46,7 +41,13 @@ HAIL: ADDIU $t2, $a0, 0			#set temp register $t2 to argument n
            SLL $0, $0, 0		#delay slot for BLTZ
            
            TERMI: ADDIU $v0, $t7, 0 	#return value $v0 set to i
-	   TERM: JR $31			#JR 31 to return i
+	   TERM: LW $a2, 4($sp)		#load $a2 from stack
+                 LW $a1, 8($sp)		#load $a1 from stack
+                 LW $a0, 12($sp)	#load $a0 from stack
+                 LW $fp, 16($sp)	#load $fp from stack
+                 LW $ra, 20($sp)	#load $ra from stack
+                 ADDIU $sp, $sp, 24	#deallocate stack
+                 JR $ra			#jump to $ra to return i
                  SLL $0, $0, 0		#delay slot for JR
 
       EXIT: ADDIU $v0, $t3, 0		#set return value $v0 to A[n]
@@ -61,6 +62,6 @@ HAIL: ADDIU $t2, $a0, 0			#set temp register $t2 to argument n
              J REC			#jump to recursive call
              SLL $0, $0, 0		#delay slot for J
 
-      EXIT4: SW $t7, $t6($a1)		#store i in A[n] (A[n] = i)
+      EXIT4: SW $t7, 0($t9)		#store i in A[n] (A[n] = i)
              J TERMI			#jump to TERM
              SLL $0, $0, 0		#delay slot for J

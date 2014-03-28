@@ -1,15 +1,3 @@
-int i_hailstone(int n) {
-        int i = 0;
-        while (n != 1) {
-            i = i + 1;
-            if ((n % 2) == 0)
-                n = n/2;
-            else
-                n = 3*n+1;
-        }
-        return i;
-    }
-
 ADDIU $t0, $0, 1			#set temp register $t0 to 1 for conditionals	
 ADDIU $v0, $0, 0			#set return value i at register $v0 to 0
 
@@ -29,7 +17,7 @@ WHILE: ADDIU $t1, $a0, 0		#set temp register $t1 to argument n
        J WHILE				#jump to WHILE for next iteration
        SLL $0, $0, 0			#delay slot for J
 
-       EXIT: JR $31			#JR 31 to return value of i in $v0
+       EXIT: JR $ra			#jump to $ra to return value of i in $v0
              SLL $0, $0, 0		#delay slot for JR
 
        EXIT2: SRA $a0, $a0, 1		#argument n set to n/2
