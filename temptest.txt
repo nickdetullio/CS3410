@@ -1,3 +1,31 @@
+<<<<<<< HEAD
+ADDIU $a0, $0, 40
+ADDIU $v0, $0, 0			#set return value $v0 to 0
+ADDIU $t0, $0, 1			#set temp register $t0 to 1 for conditionals
+
+HAIL: ADDIU $t1, $a0, 0			#set temp register $t1 to argument n
+      BEQ $t1, $t0, EXIT		#branch to EXIT if n == 1
+      SLL $0, $0, 0			#delay slot for BEQ
+
+      ANDI $t2, $t1, 1			#ANDI of n and 1 for modulo arithmetic stored in $t2
+      BNE $t2, $t0, COND		#branch to COND if (n % 2) == 0
+      SLL $0, $0, 0			#delay slot for BNE
+
+      ADDU $a0, $t1, $t1		#argument n set to 3n + 1
+      ADDU $a0, $a0, $t1
+      ADDIU $a0, $a0, 1
+
+      REC: JAL HAIL			#recursive call
+           SLL $0, $0, 0		#delay slot for JAL
+           ADDIU $v0, $v0, 1		#return value set to 1 + r_hailstone
+
+      EXIT: JR $31			#JR 31 to return $v0
+            SLL $0, $0, 0		#delay slot for JR
+
+      COND: SRA $a0, $t1, 1		#argument n set to n/2
+            J REC			#jump to recursive call
+            SLL $0, $0, 0		#delay slot for J
+=======
 NOR $1, $0, $0
 SLL $0, $0, 0
 SLL $0, $0, 0
@@ -7,3 +35,4 @@ SLL $1, $1, 1
 SLL $0, $0, 0
 SLL $0, $0, 0
 TEST: SLL $1, $1, 2
+>>>>>>> FETCH_HEAD

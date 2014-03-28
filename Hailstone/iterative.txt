@@ -1,0 +1,27 @@
+
+ADDIU $t0, $0, 1			#set temp register $t0 to 1 for conditionals	
+ADDIU $v0, $0, 0			#set return value i at register $v0 to 0
+
+WHILE: ADDIU $t1, $a0, 0		#set temp register $t1 to argument n
+       BEQ $t1, $t0, EXIT		#branch to EXIT if n == 1
+       SLL $0, $0, 0			#delay slot for BEQ
+
+       ADDIU $v0, $v0, 1		#increment i
+
+       ANDI $t2, $t1, 1			#ANDI of n and 1 for modulo arithmetic stored in $t2
+       BNE $t2, $t0, EXIT2		#branch to EXIT2 if (n % 2) == 0
+       SLL $0, $0, 0			#delay slot for BEQ
+
+       ADDU $a0, $t1, $t1		#argument n set to 3n + 1
+       ADDU $a0, $a0, $t1
+       ADDIU $a0, $a0, 1
+       J WHILE				#jump to WHILE for next iteration
+       SLL $0, $0, 0			#delay slot for J
+
+       EXIT: JR $ra			#jump to $ra to return value of i in $v0
+             SLL $0, $0, 0		#delay slot for JR
+
+       EXIT2: SRA $a0, $a0, 1		#argument n set to n/2
+              J WHILE			#jump to WHILE for next iteration
+              SLL $0, $0, 0		#delay slot for J
+

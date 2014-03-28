@@ -1,0 +1,36 @@
+
+HAIL: ADDIU $v0, $0, 0			#set return value $v0 to 0
+      ADDIU $t0, $0, 0			#set temp register $t0 to 0 for conditionals
+      ADDIU $t1, $0, 1			#set temp register $t1 to 1 for conditionals
+      ADDIU $sp, $sp, -12		#allocate stack frame
+      SW $ra, 8($sp)			#store $ra to stack
+      SW $fp, 4($sp)			#store $fp to stack
+      ADDIU $fp, $sp, 8			#resize $fp
+
+
+      ADDIU $t2, $a0, 0			#set temp register $t2 to argument n
+      BEQ $t2, $t1, EXIT		#branch to EXIT if n == 1
+      SLL $0, $0, 0			#delay slot for BEQ
+
+      ANDI $t3, $t2, 1			#ANDI of n and 1 for modulo arithmetic stored in $t2
+      BEQ $t3, $t0, COND		#branch to COND if (n % 2) == 0
+      SLL $0, $0, 0			#delay slot for BEQ
+
+      ADDU $a0, $t2, $t2		#argument n set to 3n + 1
+      ADDU $a0, $a0, $t2
+      ADDIU $a0, $a0, 1
+
+      REC: JAL HAIL			#recursive call
+           SLL $0, $0, 0		#delay slot for JAL
+           ADDIU $v0, $v0, 1		#return value set to 1 + r_hailstone
+
+      EXIT: LW $fp, 4($sp)		#load $fp from stack
+            LW $ra, 8($sp)		#load $ra from stack
+            ADDIU $sp, $sp, 12		#deallocate stack frame
+            JR $ra			#jump to $ra to return $v0
+            SLL $0, $0, 0		#delay slot for JR
+
+      COND: SRA $a0, $t2, 1		#argument n set to n/2
+            J REC			#jump to recursive call
+            SLL $0, $0, 0		#delay slot for J
+
