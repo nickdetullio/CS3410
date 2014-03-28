@@ -1,3 +1,4 @@
+
 HAIL: ADDIU $t0, $0, 0			#set temp register $t0 to 0 for conditionals
       ADDIU $t1, $0, 1			#set temp register $t1 to 1 for conditionals
       ADDIU $t2, $a0, 0			#set temp register $t2 to argument n
@@ -65,3 +66,4 @@ HAIL: ADDIU $t0, $0, 0			#set temp register $t0 to 0 for conditionals
       EXIT4: SW $t7, 0($t9)		#store i in A[n] (A[n] = i)
              J TERMI			#jump to TERM
              SLL $0, $0, 0		#delay slot for J
+

@@ -1,3 +1,4 @@
+
 ADDIU $t0, $0, 1			#set temp register $t0 to 1 for conditionals	
 ADDIU $v0, $0, 0			#set return value i at register $v0 to 0
 
@@ -23,3 +24,4 @@ WHILE: ADDIU $t1, $a0, 0		#set temp register $t1 to argument n
        EXIT2: SRA $a0, $a0, 1		#argument n set to n/2
               J WHILE			#jump to WHILE for next iteration
               SLL $0, $0, 0		#delay slot for J
+
