@@ -2,7 +2,7 @@
 
 void __start(int core_id, int num_crashes, unsigned char payload) {
 
-    unsigned char *ptr = HOME_DATA_SEGMENT; // start on even cache line
+    unsigned int *ptr = (unsigned int *) HOME_DATA_SEGMENT; // start on even cache line
 
     unsigned char *opp_ptr = OPPONENT_DATA_SEGMENT;
 
@@ -37,14 +37,14 @@ void __start(int core_id, int num_crashes, unsigned char payload) {
 
     else { 
    
-      ptr += core_id * (CACHE_LINE/3);
+      ptr += core_id * (CACHE_LINE/3)/4;
 
       while (1) {
         int i;
-        for (i = 0; i < CACHE_LINE/3; i++) {
-          ptr[i] = payload;
+        for (i = 0; i < CACHE_LINE/12; i++) {
+          ptr[i] = payload << 24 | payload << 16 | payload << 8 | payload;
         }
-        ptr += 2*CACHE_LINE;
+        ptr += (2*CACHE_LINE)/4;
       } 
    }
 }
