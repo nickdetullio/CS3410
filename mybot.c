@@ -24,15 +24,20 @@ void __start(int core_id, int num_crashes, unsigned char payload) {
             retreat();
             no_thunderbolts--;
             i++;
-          }
-          else { 
+         }
+         else { 
             for (i = 0; i < TAUNT_SIZE; i++) {
               if (HOME_STATUS->taunt[i] >= 0) {
                 Call_Jenny(HOME_STATUS->taunt[i]);
               }            
             }
          }
-         prefetch(opp_ptr);
+         if (no_snorlaxes == 0 && no_thunderbolts == 0) {
+           invalidate(opp_ptr);
+         }
+         else {
+           prefetch(opp_ptr);
+         }
        }
     }	
 
