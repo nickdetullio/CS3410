@@ -32,6 +32,7 @@ void __start(int core_id, int num_crashes, unsigned char payload) {
               }            
             }
          }
+         prefetch(opp_ptr);
        }
     }	
 
@@ -45,6 +46,7 @@ void __start(int core_id, int num_crashes, unsigned char payload) {
           ptr[i] = payload << 24 | payload << 16 | payload << 8 | payload;
         }
         ptr += (2*CACHE_LINE)/4;
+        prefetch(ptr);
       } 
    }
 }
