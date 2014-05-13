@@ -5,14 +5,15 @@
 #define STATS 2
 
 void mutex_lock(int data_struct) {
-   asm (
-        "try: LI $t1, 1            \n"
-        "LL $t0, 0($data_struct)     \n" 
-        "BNEZ $t0, try             \n"
-        "SC $t1, 0($data_struct)     \n"
-        "BEQZ $1, try              \n");
+   __asm__ __volatile__ (
+        "MOV %r1, #0x1 /n"
+        "1: LDREX %r0, %[data_struct]  /n"
+        "CMP %r0, #0 /n"
+        "STREXEQ %r0, %r1, %[data_struct] /n"  
+        "CMPEQ r0, #0  /n"    
+        "BNE 1b /n"           );
 }
 
 void mutex_unlock(int data_struct) {
-   asm ("SW $zero, 0($data_struct)");
+   __asm__ __volatile__ ("MOV %data_struct, #0x0");
 }
