@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
 
 typedef struct arraylist {
     int *buffer;     // pointer to allocated memory
@@ -14,7 +11,7 @@ typedef struct arraylist {
 //Functions that you need to implement:
 
 void resize_buffer(arraylist *a) {
-   if (a->buffer==NULL) {
+   if (a->buffer==0) {
       a->buffer_size = 2;
       a->buffer = malloc(a->buffer_size*sizeof(int));
     }
@@ -57,7 +54,7 @@ void arraylist_free(arraylist *a) {
 
 arraylist* arraylist_new() {
     arraylist *a = (arraylist *)malloc(sizeof(arraylist));
-    a->buffer = NULL;
+    a->buffer = 0;
     a->buffer_size = 0;
     a->length = 0;
 
