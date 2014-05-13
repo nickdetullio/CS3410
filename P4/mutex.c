@@ -1,8 +1,8 @@
 #include "mutex.h"
 
-#define RING_BUFFER 1
-#define QUEUE 2
-#define STATS 3
+#define RING_BUFFER 0
+#define QUEUE 1
+#define STATS 2
 
 void mutex_lock(int data_struct) {
    asm (
