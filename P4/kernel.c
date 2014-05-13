@@ -62,6 +62,11 @@ void interrupt_handler(int cause)
     unhandled_interrupts &= ~(1 << INTR_TIMER);
   }
 
+  if (pending_interrupts & (1 << INTR_NETWORK)) {
+    printf("interrupt_handler: got a network interrupt \n");
+    unhandled_interrupts &= ~(1 << INTR_TIMER);
+  }
+
   if (unhandled_interrupts != 0) {
     printf("got interrupt_handler: one or more other interrupts (0x%08x)...\n", unhandled_interrupts);
   }
@@ -142,6 +147,9 @@ void __boot() {
     // initialize keyboard late, since it isn't really used by anything else
     keyboard_init();
 
+    // initialize network
+    network_init();
+
     // see which cores are already on
     for (int i = 0; i < 32; i++)
       printf("CPU[%d] is %s\n", i, (current_cpu_enable() & (1<<i)) ? "on" : "off");
@@ -170,7 +178,13 @@ void __boot() {
   unsigned int t1  = current_cpu_cycles();
   printf("DONE (%u cycles)!\n", t1 - t0);
 
-  while (1) ;
+  network_start_receive();
+
+  while (1) 
+    {
+      if (current_cpu_id() == 0)
+        network_poll();
+    }
 
   for (int i = 1; i < 30; i++) {
     int size = 1 << i;
