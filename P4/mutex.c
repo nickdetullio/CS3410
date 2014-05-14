@@ -1,19 +1,47 @@
 #include "mutex.h"
 
-#define RING_BUFFER 0
-#define QUEUE 1
-#define STATS 2
+#define BUFFER1 1
+#define BUFFER2 2
+#define STATS 3
 
-void mutex_lock(int data_struct) {
+void mutex_lock_buffer1() {
    __asm__ __volatile__ (
         "MOV %r1, #0x1 /n"
-        "1: LDREX %r0, %[data_struct]  /n"
+        "1: LDREX %r0, %[BUFFER1]  /n"
         "CMP %r0, #0 /n"
-        "STREXEQ %r0, %r1, %[data_struct] /n"  
+        "STREXEQ %r0, %r1, %[BUFFER1] /n"  
         "CMPEQ r0, #0  /n"    
         "BNE 1b /n"           );
 }
 
-void mutex_unlock(int data_struct) {
-   __asm__ __volatile__ ("MOV %data_struct, #0x0");
+void mutex_unlock_buffer1() {
+   __asm__ __volatile__ ("MOV %BUFFER1, #0x0");
+}
+
+void mutex_lock_buffer2() {
+   __asm__ __volatile__ (
+        "MOV %r1, #0x1 /n"
+        "1: LDREX %r0, %[BUFFER2]  /n"
+        "CMP %r0, #0 /n"
+        "STREXEQ %r0, %r1, %[BUFFER2] /n"  
+        "CMPEQ r0, #0  /n"    
+        "BNE 1b /n"           );
+}
+
+void mutex_unlock_buffer2() {
+   __asm__ __volatile__ ("MOV %STATS, #0x0");
+}
+
+void mutex_lock_stats() {
+   __asm__ __volatile__ (
+        "MOV %r1, #0x1 /n"
+        "1: LDREX %r0, %[STATS] /n"
+        "CMP %r0, #0 /n"
+        "STREXEQ %r0, %r1, %[STATS] /n"  
+        "CMPEQ r0, #0  /n"    
+        "BNE 1b /n"           );
+}
+
+void mutex_unlock_stats() {
+   __asm__ __volatile__ ("MOV %STATS, #0x0");
 }
