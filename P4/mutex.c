@@ -1,47 +1,22 @@
 #include "mutex.h"
+#include "kernel.h"
 
-#define BUFFER1 1
-#define BUFFER2 2
-#define STATS 3
-
-void mutex_lock_buffer1() {
-   __asm__ __volatile__ (
-        "MOV %r1, #0x1 /n"
-        "1: LDREX %r0, %[BUFFER1]  /n"
-        "CMP %r0, #0 /n"
-        "STREXEQ %r0, %r1, %[BUFFER1] /n"  
-        "CMPEQ r0, #0  /n"    
-        "BNE 1b /n"           );
+void mutex_lock(int *addr) {
+   asm volatile(
+        ".set mips2    \n"
+        "try: LI $8, 1 \n"
+        "LL $9, 0($4)  \n"
+        "bnez $9, try  \n"
+        "sc $8, 0($4)  \n"
+        "beqz $8, try  \n"
+        : "=r" (addr)           );
 }
 
-void mutex_unlock_buffer1() {
-   __asm__ __volatile__ ("MOV %BUFFER1, #0x0");
+void mutex_unlock_buffer(int *addr) {
+   asm (
+      ".set mips2   \n"
+      "SW $0, 0($4) \n"
+      : "=r" (addr));
 }
 
-void mutex_lock_buffer2() {
-   __asm__ __volatile__ (
-        "MOV %r1, #0x1 /n"
-        "1: LDREX %r0, %[BUFFER2]  /n"
-        "CMP %r0, #0 /n"
-        "STREXEQ %r0, %r1, %[BUFFER2] /n"  
-        "CMPEQ r0, #0  /n"    
-        "BNE 1b /n"           );
-}
 
-void mutex_unlock_buffer2() {
-   __asm__ __volatile__ ("MOV %STATS, #0x0");
-}
-
-void mutex_lock_stats() {
-   __asm__ __volatile__ (
-        "MOV %r1, #0x1 /n"
-        "1: LDREX %r0, %[STATS] /n"
-        "CMP %r0, #0 /n"
-        "STREXEQ %r0, %r1, %[STATS] /n"  
-        "CMPEQ r0, #0  /n"    
-        "BNE 1b /n"           );
-}
-
-void mutex_unlock_stats() {
-   __asm__ __volatile__ ("MOV %STATS, #0x0");
-}
