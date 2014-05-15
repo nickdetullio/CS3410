@@ -6,6 +6,14 @@
 #include "console.h"
 #include "keyboard.h"
 #include "network.h"
+#include "mutex.h"
+
+// locks
+int statistics = 0;
+int arraylists = 0;
+int printlock = 0;
+int queuel = 0;
+int ringbuffer = 0;
 
 /* This is used by the trap handler to save the CPU state
  * Note: So long as trap handlers do not touch any coprocessor state (e.g.

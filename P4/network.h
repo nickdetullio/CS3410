@@ -5,13 +5,6 @@
 #include "honeypot.h"
 #include "machine.h"
 
-// locks
-int statistics = 0;
-int arraylists = 0;
-int print = 0;
-int queue = 0;
-int ringbuffer = 0;
-
 void network_init();
 
 void network_start_receive();
