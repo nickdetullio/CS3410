@@ -4,7 +4,7 @@
 #include "kernel.h"
 #include "honeypot.h"
 #include "machine.h"
-//#include "arraylist.c"
+#include "arraylist.c"
 //#include "hashtable.c"
 
 void network_init();

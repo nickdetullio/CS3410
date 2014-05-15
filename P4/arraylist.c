@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
+#include "kernel.h"
+
+#define NULL 0
 
 typedef struct arraylist {
     int *buffer;     // pointer to allocated memory
@@ -21,7 +21,10 @@ void arraylist_add(arraylist *a, int x) {
     }
     if (a->buffer_size == a->length) {
         a->buffer_size = a->buffer_size*2;
-        a->buffer = (int *)realloc(a->buffer, a->buffer_size*sizeof(int));
+        int* temp = (int *)malloc(a->buffer_size*sizeof(int));
+        for (int i = 0; i < a->length; ++i)
+            temp[i] = a->buffer[i];
+        a->buffer = temp;
     }
     a->buffer[a->length] = x;
     ++a->length;
@@ -42,7 +45,10 @@ void arraylist_insert(arraylist *a, int index, int x) {
     }
     if (a->buffer_size == a->length) {
         a->buffer_size = a->buffer_size*2;
-        a->buffer = (int *)realloc(a->buffer, a->buffer_size*sizeof(int));
+        int* temp = (int *)malloc(a->buffer_size*sizeof(int));
+        for (int i = 0; i < a->length; ++i)
+            temp[i] = a->buffer[i];
+        a->buffer = temp;
     }
 
     // move all elements to make space for insertion
