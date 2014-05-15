@@ -183,10 +183,12 @@ void __boot() {
 
   while (1) 
     {
-      if (current_cpu_id() >= 0 && current_cpu_id() <= 4)
+      if (current_cpu_id() == 0)
+        network_poll();
+      /*if (current_cpu_id() >= 0 && current_cpu_id() <= 4)
         network_poll();
       else if (current_cpu_id() >= 5 && current_cpu_id() <= 15)
-        handle_packet();
+        handle_packet();*/
       //something for console requests too?
     }
 

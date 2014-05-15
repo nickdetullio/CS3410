@@ -1,6 +1,7 @@
 #include "network.h"
 
 #define RING_SIZE 16
+#define QUEUE_SIZE 64
 #define BUFFER_SIZE 4000
 #define NULL 0
 
@@ -111,34 +112,17 @@ void arraylist_print(arraylist *a) {
     printf("]\n");
 }
 
-int main(int argc, char *argv[]) {
-    // START OF TEST
-    int i;
-    arraylist *a = arraylist_new();
-
-    arraylist_add(a, 0);
-    arraylist_add(a, 1);
-    arraylist_add(a, 2);
-    arraylist_print(a);
-    
-    for (i = 0; i < a->length + 1; i++) {
-        arraylist_insert(a, i, 100);
-        printf("Insert position %d: ", i);
-        arraylist_print(a);
-        arraylist_remove(a, i);
-    }
-    printf("Clean: ");
-    arraylist_print(a);
-
-    arraylist_free(a);
-    // END OF TEST
-
-    return 0;
-}
-
+struct stats_queue {
+  unsigned int rx_base;
+  unsigned int rx_capacity;
+  unsigned int rx_head;
+  unsigned int rx_tail;
+};
 
 volatile struct dev_net *dev_net;
 struct dma_ring_slot* ring; 
+struct stats_queue* stats_queue;
+struct dma_ring_slot* queue;
 struct arraylist* spammers; //source addresses of the spammers
 struct arraylist* spammer_count; //how many packets of the source addresses arrived
 struct arraylist* evils; //fingerprint values
@@ -162,6 +146,7 @@ void network_init()
       dev_net = physical_to_virtual(bootparams->devtable[i].start);
     }
   }
+
       // allocate ring buffer for receiving packets
       ring = (struct dma_ring_slot*)malloc(sizeof(struct dma_ring_slot)*RING_SIZE);
       dev_net->rx_base = virtual_to_physical(ring);
@@ -174,6 +159,21 @@ void network_init()
         ring[i].dma_base = virtual_to_physical(space);
         ring[i].dma_len = BUFFER_SIZE;
       }
+
+      // allocate ring buffer to use as queue for handling statistics
+      queue = (struct dma_ring_slot*)malloc(sizeof(struct dma_ring_slot)*QUEUE_SIZE);
+      stats_queue = (struct stats_queue*)malloc(sizeof(struct stats_queue));
+      stats_queue->rx_base = virtual_to_physical(queue);
+      stats_queue->rx_capacity = QUEUE_SIZE;
+      stats_queue->rx_head = 0;
+      stats_queue->rx_tail = 0;
+      for (int i = 0; i < QUEUE_SIZE; ++i)
+      {
+        void* space = malloc(BUFFER_SIZE);
+        queue[i].dma_base = virtual_to_physical(space);
+        queue[i].dma_len = BUFFER_SIZE;
+      }
+      printf("Three");
       // initialize honeypot data structures
       spammers = arraylist_new();
       spammer_count = arraylist_new();
@@ -203,44 +203,28 @@ void network_trap()
   }
 }
 
-void network_poll()
+void handle_packet()
 {
-  while(1) {
-    if (dev_net->rx_tail != dev_net->rx_head){
-      // get the address of the packet
-      unsigned int ring_num = (dev_net->rx_tail % dev_net->rx_capacity);
-      
-      // get its physical address
-      struct honeypot_command_packet* packet;
-      packet = (struct honeypot_command_packet *)ring[ring_num].dma_base;
-     
-      // convert to a virtual address so we can reference it
-      packet = (struct honeypot_command_packet *)physical_to_virtual((int)packet);
-     
-      // TODO: enqueue this packet 
+  // QUEUE MUTEX LOCK
+  // get its physical address
+  if (stats_queue->rx_tail != stats_queue->rx_head){
+    // get the address of the packet
+    unsigned int queue_num = (stats_queue->rx_tail % stats_queue->rx_capacity);
+    struct honeypot_command_packet* packet;
+    packet = (struct honeypot_command_packet *)queue[queue_num].dma_base;
+ 
+    // convert to a virtual address so we can reference it
+    packet = (struct honeypot_command_packet *)physical_to_virtual((int)packet);
+  
+  // HONEYPOT MUTEX LOCK
 
-      // store packet statistics
-      packets_so_far++;
-      packets_interval++;
-      dev_net->cmd = NET_GET_DROPCOUNT;
-      drop_count += dev_net->data;
-      double time_since_boot = (double) current_cpu_cycles() / CPU_CYCLES_PER_SECOND;
-      if (time_since_boot - num_seconds > 10.0)
-      {
-        transfer_rate = packets_interval / (time_since_boot - num_seconds);
-        packets_interval = 0;
-      }
-      
-      printf("Packets so far:%d\tDropped packets:%d\tTransfer rate:%f\n", 
-        packets_so_far, drop_count, transfer_rate);
-
- if (packet->secret_big_endian == 0x1034) {
+  if (packet->secret_big_endian == to_little_endian(HONEYPOT_SECRET)) {
     if (packet->cmd_big_endian == to_little_endian(HONEYPOT_ADD_SPAMMER)) {
       arraylist_add(spammers, packet->data_big_endian);
       arraylist_add(spammer_count, 0);
     }
     else if (packet->cmd_big_endian == to_little_endian(HONEYPOT_ADD_EVIL)){
-      int fingerprint = hash((unsigned char*)packet, ring[ring_num].dma_len);
+      int fingerprint = hash((unsigned char*)packet, queue[queue_num].dma_len);
       arraylist_add(evils, fingerprint);
       arraylist_add(evil_count, 0);
     }
@@ -259,7 +243,7 @@ void network_poll()
       }
     }
     else if (packet->cmd_big_endian == to_little_endian(HONEYPOT_DEL_EVIL)) {
-      int fingerprint = hash((unsigned char*)packet, ring[ring_num].dma_len);
+      int fingerprint = hash((unsigned char*)packet, queue[queue_num].dma_len);
       for (int i = 0; i < evils->length; ++i)
       {
         if (arraylist_get(evils, i) == fingerprint)
@@ -283,7 +267,7 @@ void network_poll()
       print_stats();
   }
   else {
-    int fingerprint = hash((unsigned char*)packet, ring[ring_num].dma_len);
+    int fingerprint = hash((unsigned char*)packet, queue[queue_num].dma_len);
     // check if matches 
     for (int i = 0; i < spammers->length; ++i)
     {
@@ -316,96 +300,78 @@ void network_poll()
       }
     }
   }
+}
+  // HONEYPOT MUTEX UNLOCK
+// QUEUE MUTEX UNLOCK
+}
+
+void network_poll()
+{
+  while(1) {
+    // RING BUFFER MUTEX LOCK
+    if (dev_net->rx_tail != dev_net->rx_head){
+      // get the address of the packet
+      unsigned int ring_num = (dev_net->rx_tail % dev_net->rx_capacity);
+
+      struct honeypot_command_packet* temp_packet;
+      temp_packet = (struct honeypot_command_packet *)ring[ring_num].dma_base;
+ 
+      // convert to a virtual address so we can reference it
+      temp_packet = (struct honeypot_command_packet *)physical_to_virtual((int)temp_packet);
+      struct honeypot_command_packet* packet;
+      packet = (struct honeypot_command_packet *)malloc(HONEYPOT_CMD_PKT_MIN_LEN);
+      packet->headers.ip_version = temp_packet->headers.ip_version;
+      packet->headers.ip_qos = temp_packet->headers.ip_qos;
+      packet->headers.ip_len = temp_packet->headers.ip_len;
+      packet->headers.ip_id = temp_packet->headers.ip_id;
+      packet->headers.ip_flags = temp_packet->headers.ip_flags;
+      packet->headers.ip_ttl = temp_packet->headers.ip_ttl;
+      packet->headers.ip_protocol = temp_packet->headers.ip_protocol;
+      packet->headers.ip_checksum = temp_packet->headers.ip_checksum;
+      packet->headers.ip_source_address_big_endian = temp_packet->headers.ip_source_address_big_endian;
+      packet->headers.ip_dest_address_big_endian = temp_packet->headers.ip_dest_address_big_endian;
+      packet->headers.udp_source_port_big_endian = temp_packet->headers.udp_source_port_big_endian;
+      packet->headers.udp_dest_port_big_endian = temp_packet->headers.udp_dest_port_big_endian;
+      packet->headers.udp_len = temp_packet->headers.udp_len;
+      packet->headers.udp_checksum = temp_packet->headers.udp_checksum;
+      packet->secret_big_endian = temp_packet->secret_big_endian;
+      packet->cmd_big_endian = temp_packet->cmd_big_endian;
+      packet->data_big_endian = temp_packet->data_big_endian;
+      // enqueue this packet
+      if (stats_queue->rx_tail != (stats_queue->rx_head-1))
+      {
+        queue[stats_queue->rx_head].dma_base = virtual_to_physical(packet);
+        queue[stats_queue->rx_head].dma_len = ring[ring_num].dma_len;
+        stats_queue->rx_head = (stats_queue->rx_head+1) % stats_queue->rx_capacity;
+      }
+
+       // STATISTICS MUTEX LOCK
+      // store packet statistics
+      packets_so_far++;
+      packets_interval++;
+      dev_net->cmd = NET_GET_DROPCOUNT;
+      drop_count += dev_net->data;
+      double time_since_boot = (double) current_cpu_cycles() / CPU_CYCLES_PER_SECOND;
+      if (time_since_boot - num_seconds > 10.0)
+      {
+        transfer_rate = packets_interval / (time_since_boot - num_seconds);
+        packets_interval = 0;
+      }
+      // STATISTICS MUTEX UNLOCK
+      
+      printf("Packets so far:%d\tDropped packets:%d\tTransfer rate:%f\n", 
+        packets_so_far, drop_count, transfer_rate);
 
       ring[ring_num].dma_len = BUFFER_SIZE;
-      dev_net->rx_tail++;
+      dev_net->rx_tail = (dev_net->rx_tail+1) % dev_net->rx_capacity;
+      // RING BUFFER MUTEX UNLOCK
+      handle_packet();
     }
   }
 }
- /*
-void handle_packet()
-{
-  // TODO
- 
-  //mutex.lock();
-  packets_so_far++;
-  dev_net->cmd = NET_GET_DROPCOUNT;
-  drop_count += dev_net->data;
-  
-  struct honeypot_command_packet packet* = arraylist.get()
-  // check if command packet
-  if (packet->secret_big_endian == 0x1034) {
-    if (packet->cmd_big_endian = to_little_endian(HONEYPOT_ADD_SPAMMER)) {
-      arraylist_add(spammers, packet->data_big_endian);
-      arraylist_add(spammer_count, 0);
-    }
-    else if (packet->cmd_big_endian = to_little_endian(HONEYPOT_ADD_EVIL)){
-      int fingerprint = hash(packet);
-      arraylist_add(evils, fingerprint);
-      arraylist_add(evil_count, 0);
-    }
-    else if (packet->cmd_big_endian = to_little_endian(HONEYPOT_ADD_VULNERABLE)){
-      arraylist_add(vulnerables, packet->data_big_endian);
-      arraylist_add(vulnerable_count, 0);
-    }
-    else if (packet->cmd_big_endian = to_little_endian(HONEYPOT_DEL_SPAMMER)) {
-      for (int i = 0; i < spammers->length; ++i)
-      {
-        if (arraylist_get(spammers, i) == packet->data_big_endian)
-        {
-          arraylist_remove(spammers, i);
-          arraylist_remove(spammer_count, i);
-        }
-      }
-    }
-    else if (packet->cmd_big_endian = to_little_endian(HONEYPOT_DEL_EVIL)) {
-      int fingerprint = hash(packet);
-      for (int i = 0; i < evils->length; ++i)
-      {
-        if (arraylist_get(evils, i) == fingerprint)
-        {
-          arraylist_remove(evils, i);
-          arraylist_remove(evil_count, i);
-        }
-      }
-    else if (packet->cmd_big_endian = to_little_endian(HONEYPOT_DEL_VULNERABLE)) {
-      for (int i = 0; i < vulnerables->length; ++i)
-      {
-        if (arraylist_get(vulnerables, i) == packet->data_big_endian)
-        {
-          arraylist_remove(vulnerables, i);
-          arraylist_remove(vulnerable_count, i);
-        }
-      }
-    //else if (packet->cmd_big_endian = to_little_endian(HONEYPOT_PRINT))
-      //print_stats();
-  }
-  else {
-    int fingerprint = hash(packet);
-    // check if matches 
-    for (int i = 0; i < spammers->length; ++i)
-    {
-      if (arraylist_get(spammers, i) == packet->data_big_endian)
-      {
-        arraylist_get(spammer_count, i)++;
-      }
-    }
-    for (int i = 0; i < evils->length; ++i)
-    {
-      if (arraylist_get(evils, i) == fingerprint)
-      {
-        arraylist_get(evil_count, i)++;
-      }
-    }
-    for (int i = 0; i < vulnerables->length; ++i)
-    {
-      if (arraylist_get(vulnerables, i) == packet->data_big_endian)
-      {
-        arraylist_get(vulnerable_count, i)++;
-      }
-    }
-  }
-  */
+
+
+
 
 unsigned short to_little_endian(unsigned short x)
 {
