@@ -1,8 +1,8 @@
 #ifndef MUTEX_H_
 #define MUTEX_H_
 
-void mutex_lock(int structure);
+void mutex_lock(int *addr);
 
-void mutex_lock(int structure);
+void mutex_unlock(int *addr);
 
 #endif
