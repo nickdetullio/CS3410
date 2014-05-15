@@ -130,11 +130,11 @@ struct arraylist* evil_count; //how many pacets with that fingerprint arrived
 struct arraylist* vulnerables; //destination ports of the spammers
 struct arraylist* vulnerable_count; //how many packets of destination ports arrived
 
-int packets_so_far = 0; 
-int packets_interval = 0;
-int bytes_interval = 0;
-double num_seconds = 0.0;
-double transfer_rate = 0.0;
+int packets_so_far; 
+int packets_interval;
+int bytes_interval;
+double num_seconds;
+double transfer_rate;
 
 void network_init()
 {
@@ -146,7 +146,12 @@ void network_init()
       dev_net = physical_to_virtual(bootparams->devtable[i].start);
     }
   }
-
+      // initialize statistics constants
+      packets_so_far = 0;
+      packets_interval = 0;
+      bytes_interval = 0;
+      num_seconds = 0.0;
+      transfer_rate = 0.0;
       // allocate ring buffer for receiving packets
       ring = (struct dma_ring_slot*)malloc(sizeof(struct dma_ring_slot)*RING_SIZE);
       dev_net->rx_base = virtual_to_physical(ring);
@@ -314,6 +319,7 @@ void handle_packet()
   mutex_unlock(&arraylists);
 // QUEUE MUTEX UNLOCK
 mutex_unlock(&queuel);
+
 }
 
 void network_poll()
@@ -364,24 +370,23 @@ void network_poll()
       packets_interval++;
       bytes_interval += ring[ring_num].dma_len;
       double time_since_boot = (double) current_cpu_cycles() / CPU_CYCLES_PER_SECOND;
-      if (time_since_boot - num_seconds > 1.0)
+      if (time_since_boot - num_seconds > 10.0)
       {
-        int mbits = (4*bytes_interval) / 1000000;
-        transfer_rate = mbits / (time_since_boot - num_seconds);
+        transfer_rate = (4*bytes_interval) / (1000000*(time_since_boot - num_seconds));
         packets_interval = 0;
         bytes_interval = 0;
+        num_seconds = time_since_boot;
       }
       // STATISTICS MUTEX UNLOCK
       mutex_unlock(&statistics);
       
-      //printf("Packets so far:%d\tDropped packets:%d\tTransfer rate:%f\n", 
-      //  packets_so_far, drop_count, transfer_rate);
+//      printf("Packets so far:%d\tTransfer rate:%f\n", 
+//        packets_so_far, transfer_rate);
 
       ring[ring_num].dma_len = BUFFER_SIZE;
       dev_net->rx_tail = (dev_net->rx_tail+1) % dev_net->rx_capacity;
       // RING BUFFER MUTEX UNLOCK
       mutex_unlock(&ringbuffer);
-      handle_packet();
     }
   }
 }
@@ -395,18 +400,27 @@ unsigned short to_little_endian(unsigned short x)
 void print_stats()
 {
   double time_since_boot = (double) current_cpu_cycles() / CPU_CYCLES_PER_SECOND;
+  mutex_lock(&ringbuffer);
   dev_net->cmd = NET_GET_DROPCOUNT;
   int drop_count = dev_net->data;
+  mutex_unlock(&ringbuffer);
   double drop_rate = (drop_count*NET_MINPKT*4) / (1000000*time_since_boot);
   mutex_lock(&printlock);
   mutex_lock(&statistics);
-  printf("time since boot: %d cycles (%f sec) packets: %d recent: %d (%f Mbits/s) drops: %d (%f Mbits/s)",
+  printf("time since boot: %d cycles (%f sec) packets: %d recent: %d (%f Mbits/s) drops: %d (%f Mbits/s)\n",
     current_cpu_cycles(), time_since_boot, packets_so_far, packets_interval, transfer_rate, drop_count, drop_rate);
-  printf("Packets so far:%d\tDropped packets:%d\tTransfer rate:%f\n", 
-    packets_so_far, drop_count, transfer_rate);
   mutex_unlock(&statistics);
   mutex_lock(&arraylists);
-  printf("Num spammers:%d\tNum evils:%d\tNum vulnerables:%d\n", spammers->length, evils->length, vulnerables->length);
+  printf("Num spammers:%d Num evils:%d Num vulnerables:%d\n", spammers->length, evils->length, vulnerables->length);
+  printf("SPAMMERS  COUNT\n");
+  for (int i = 0; i < spammers->length; ++i)
+    printf("%u  %d\n", arraylist_get(spammers, i), arraylist_get(spammer_count,i));
+  printf("EVILS  COUNT\n");
+  for (int i = 0; i < evils->length; ++i)
+    printf("%u  %d\n", arraylist_get(evils,i), arraylist_get(evil_count,i));
+  printf("VULNERABLES  COUNT\n");
+  for (int i = 0; i < vulnerables->length; ++i)
+    printf("%u  %d\n", arraylist_get(vulnerables,i), arraylist_get(vulnerable_count,i));
   mutex_unlock(&arraylists);
   mutex_unlock(&printlock);
 }
