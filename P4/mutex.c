@@ -12,11 +12,16 @@ void mutex_lock(int *addr) {
         : "=r" (addr)           );
 }
 
-void mutex_unlock_buffer(int *addr) {
+void mutex_unlock(int *addr) {
    asm (
       ".set mips2   \n"
       "SW $0, 0($4) \n"
       : "=r" (addr));
 }
 
+int statistics = 0;
+int arraylists = 0;
+int printlock = 0;
+int queuel = 0;
+int ringbuffer = 0;
 

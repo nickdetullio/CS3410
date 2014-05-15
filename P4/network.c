@@ -374,8 +374,8 @@ void network_poll()
       // STATISTICS MUTEX UNLOCK
       mutex_unlock(&statistics);
       
-      //printf("Packets so far:%d\tDropped packets:%d\tTransfer rate:%f\n", 
-      //  packets_so_far, drop_count, transfer_rate);
+      //printf("Packets so far:%d\tTransfer rate:%f\n", 
+        //packets_so_far, transfer_rate);
 
       ring[ring_num].dma_len = BUFFER_SIZE;
       dev_net->rx_tail = (dev_net->rx_tail+1) % dev_net->rx_capacity;
