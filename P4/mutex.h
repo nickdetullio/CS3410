@@ -15,5 +15,7 @@ int queuel;
 
 int ringbuffer;
 
+int calloc_lock;
+
 #endif
 

@@ -24,4 +24,5 @@ int arraylists = 0;
 int printlock = 0;
 int queuel = 0;
 int ringbuffer = 0;
+int calloc_lock = 0;
 

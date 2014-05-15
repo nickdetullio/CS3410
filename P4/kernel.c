@@ -180,12 +180,19 @@ void __boot() {
 
   busy_wait(current_cpu_id() * 0.1); // wait a while so messages from different cores don't get so mixed up
   int size = 64 * 1024 * 4;
+
   mutex_lock(&printlock);
   printf("about to do calloc(%d, 1)\n", size);
   mutex_unlock(&printlock);
+
   unsigned int t0  = current_cpu_cycles();
+
+  mutex_lock(&calloc_lock);
   calloc(size, 1);
+  mutex_unlock(&calloc_lock);
+
   unsigned int t1  = current_cpu_cycles();
+
   mutex_lock(&printlock);
   printf("DONE (%u cycles)!\n", t1 - t0);
   mutex_unlock(&printlock);
@@ -194,19 +201,21 @@ void __boot() {
 
   while (1) 
     {
-      if (current_cpu_id() == 0)
+      if (current_cpu_id() == 0) {// && current_cpu_id() <= 4)
         network_poll();
-      /*if (current_cpu_id() >= 0 && current_cpu_id() <= 4)
-        network_poll();
-      else if (current_cpu_id() >= 5 && current_cpu_id() <= 15)
-        handle_packet();*/
+      }
+      else if (current_cpu_id() >= 1) {// && current_cpu_id() <= 15) {
+        handle_packet();
+      }
       //something for console requests too?
     }
 
   for (int i = 1; i < 30; i++) {
     int size = 1 << i;
     printf("about to do calloc(%d, 1)\n", size);
+    mutex_lock(&calloc_lock);
     calloc(size, 1);
+    mutex_unlock(&calloc_lock);
   }
 
 

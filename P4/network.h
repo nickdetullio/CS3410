@@ -11,6 +11,8 @@ void network_start_receive();
 
 void network_trap();
 
+void handle_packet();
+
 void network_poll();
 
 unsigned short to_little_endian(unsigned short x);
