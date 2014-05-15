@@ -4,8 +4,13 @@
 #include "kernel.h"
 #include "honeypot.h"
 #include "machine.h"
-//#include "arraylist.c"
-//#include "hashtable.c"
+
+// locks
+int statistics = 0;
+int arraylists = 0;
+int print = 0;
+int queue = 0;
+int ringbuffer = 0;
 
 void network_init();
 

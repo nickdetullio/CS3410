@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "mutex.h"
 
 
 struct bootparams *bootparams;
@@ -153,7 +154,9 @@ void __boot() {
 
     // see which cores are already on
     for (int i = 0; i < 32; i++)
+      mutex_lock(print);
       printf("CPU[%d] is %s\n", i, (current_cpu_enable() & (1<<i)) ? "on" : "off");
+      mutex_unlock(print);
 
     // turn on all other cores
     set_cpu_enable(0xFFFFFFFF);
@@ -161,23 +164,30 @@ void __boot() {
     // see which cores got turned on
     busy_wait(0.1);
     for (int i = 0; i < 32; i++)
+      mutex_lock(print);
       printf("CPU[%d] is %s\n", i, (current_cpu_enable() & (1<<i)) ? "on" : "off");
+      mutex_unlock(print);
 
   } else {
     /* remaining cores boot after core 0 turns them on */
 
     // nothing to initialize here... 
   }
-
+  mutex_lock(print);
   printf("Core %d of %d is alive!\n", current_cpu_id(), current_cpu_exists());
+  mutex_unlock(print);
 
   busy_wait(current_cpu_id() * 0.1); // wait a while so messages from different cores don't get so mixed up
   int size = 64 * 1024 * 4;
+  mutex_lock(print);
   printf("about to do calloc(%d, 1)\n", size);
+  mutex_unlock(print);
   unsigned int t0  = current_cpu_cycles();
   calloc(size, 1);
   unsigned int t1  = current_cpu_cycles();
+  mutex_lock(print);
   printf("DONE (%u cycles)!\n", t1 - t0);
+  mutex_unlock(print);
 
   network_start_receive();
 

@@ -1,4 +1,5 @@
 #include "network.h"
+#include "globals.h"
 
 #define RING_SIZE 16
 #define QUEUE_SIZE 64
@@ -205,6 +206,7 @@ void network_trap()
 void handle_packet()
 {
   // QUEUE MUTEX LOCK
+  mutex_lock(queue);
   // get its physical address
   if (stats_queue->rx_tail != stats_queue->rx_head){
     // get the address of the packet
@@ -216,7 +218,7 @@ void handle_packet()
     packet = (struct honeypot_command_packet *)physical_to_virtual((int)packet);
   
   // HONEYPOT MUTEX LOCK
-
+  mutex_lock(arraylists);
   if (packet->secret_big_endian == to_little_endian(HONEYPOT_SECRET)) {
     if (packet->cmd_big_endian == to_little_endian(HONEYPOT_ADD_SPAMMER)) {
       //printf("COMMAND: add spammer");
@@ -310,13 +312,16 @@ void handle_packet()
 }
 //print_stats();
   // HONEYPOT MUTEX UNLOCK
+  mutex_unlock(arraylists);
 // QUEUE MUTEX UNLOCK
+mutex_unlock(queue);
 }
 
 void network_poll()
 {
   while(1) {
     // RING BUFFER MUTEX LOCK
+    mutex_lock(ringbuffer);
     if (dev_net->rx_tail != dev_net->rx_head){
       // get the address of the packet
       unsigned int ring_num = (dev_net->rx_tail % dev_net->rx_capacity);
@@ -355,6 +360,7 @@ void network_poll()
 
        // STATISTICS MUTEX LOCK
       // store packet statistics
+      mutex_lock(statistics);
       packets_so_far++;
       packets_interval++;
       bytes_interval += ring[ring_num].dma_len;
@@ -367,6 +373,7 @@ void network_poll()
         bytes_interval = 0;
       }
       // STATISTICS MUTEX UNLOCK
+      mutex_unlock(statistics);
       
       //printf("Packets so far:%d\tDropped packets:%d\tTransfer rate:%f\n", 
       //  packets_so_far, drop_count, transfer_rate);
@@ -374,6 +381,7 @@ void network_poll()
       ring[ring_num].dma_len = BUFFER_SIZE;
       dev_net->rx_tail = (dev_net->rx_tail+1) % dev_net->rx_capacity;
       // RING BUFFER MUTEX UNLOCK
+      mutex_unlock(ringbuffer);
       handle_packet();
     }
   }
@@ -391,11 +399,17 @@ void print_stats()
   dev_net->cmd = NET_GET_DROPCOUNT;
   int drop_count = dev_net->data;
   double drop_rate = (drop_count*NET_MINPKT*4) / (1000000*time_since_boot);
+  mutex_lock(print);
+  mutex_lock(statistics);
   printf("time since boot: %d cycles (%f sec) packets: %d recent: %d (%f Mbits/s) drops: %d (%f Mbits/s)",
     current_cpu_cycles(), time_since_boot, packets_so_far, packets_interval, transfer_rate, drop_count, drop_rate);
   printf("Packets so far:%d\tDropped packets:%d\tTransfer rate:%f\n", 
     packets_so_far, drop_count, transfer_rate);
+  mutex_unlock(statistics);
+  mutex_lock(arraylists);
   printf("Num spammers:%d\tNum evils:%d\tNum vulnerables:%d\n", spammers->length, evils->length, vulnerables->length);
+  mutex_unlock(arraylists);
+  mutex_unlock(print);
 }
 
 unsigned long hash(unsigned char *pkt, int n)
