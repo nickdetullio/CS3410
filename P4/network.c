@@ -313,7 +313,6 @@ void handle_packet()
       }
     }
   }
-print_stats();
 }
 //print_stats();
   // HONEYPOT MUTEX UNLOCK
