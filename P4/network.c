@@ -132,9 +132,9 @@ struct arraylist* vulnerable_count; //how many packets of destination ports arri
 
 int packets_so_far = 0; 
 int packets_interval = 0;
+int bytes_interval = 0;
 double num_seconds = 0.0;
 double transfer_rate = 0.0;
-int drop_count = 0;
 
 void network_init()
 {
@@ -173,7 +173,6 @@ void network_init()
         queue[i].dma_base = virtual_to_physical(space);
         queue[i].dma_len = BUFFER_SIZE;
       }
-      printf("Three");
       // initialize honeypot data structures
       spammers = arraylist_new();
       spammer_count = arraylist_new();
@@ -220,19 +219,22 @@ void handle_packet()
 
   if (packet->secret_big_endian == to_little_endian(HONEYPOT_SECRET)) {
     if (packet->cmd_big_endian == to_little_endian(HONEYPOT_ADD_SPAMMER)) {
+      //printf("COMMAND: add spammer");
       arraylist_add(spammers, packet->data_big_endian);
       arraylist_add(spammer_count, 0);
     }
     else if (packet->cmd_big_endian == to_little_endian(HONEYPOT_ADD_EVIL)){
-      int fingerprint = hash((unsigned char*)packet, queue[queue_num].dma_len);
-      arraylist_add(evils, fingerprint);
+      //printf("COMMAND: add evil");
+      arraylist_add(evils, packet->data_big_endian);
       arraylist_add(evil_count, 0);
     }
-    else if (packet->cmd_big_endian == to_little_endian(HONEYPOT_ADD_VULNERABLE)){
+    else if (packet->cmd_big_endian == to_little_endian(HONEYPOT_ADD_VULNERABLE)) {
+      //printf("COMMAND: add vulnerable");
       arraylist_add(vulnerables, packet->data_big_endian);
       arraylist_add(vulnerable_count, 0);
     }
     else if (packet->cmd_big_endian == to_little_endian(HONEYPOT_DEL_SPAMMER)) {
+      //printf("COMMAND: delete spammer");
       for (int i = 0; i < spammers->length; ++i)
       {
         if (arraylist_get(spammers, i) == packet->data_big_endian)
@@ -243,10 +245,10 @@ void handle_packet()
       }
     }
     else if (packet->cmd_big_endian == to_little_endian(HONEYPOT_DEL_EVIL)) {
-      int fingerprint = hash((unsigned char*)packet, queue[queue_num].dma_len);
+      //printf("COMMAND: delete evil");
       for (int i = 0; i < evils->length; ++i)
       {
-        if (arraylist_get(evils, i) == fingerprint)
+        if (arraylist_get(evils, i) == packet->data_big_endian)
         {
           arraylist_remove(evils, i);
           arraylist_remove(evil_count, i);
@@ -254,6 +256,7 @@ void handle_packet()
       }
     }
     else if (packet->cmd_big_endian == to_little_endian(HONEYPOT_DEL_VULNERABLE)) {
+      //printf("COMMAND: delete vulnerable");
       for (int i = 0; i < vulnerables->length; ++i)
       {
         if (arraylist_get(vulnerables, i) == packet->data_big_endian)
@@ -264,9 +267,13 @@ void handle_packet()
       }
     }
     else if (packet->cmd_big_endian == to_little_endian(HONEYPOT_PRINT))
+    {
+      //printf("COMMAND: print statistics");
       print_stats();
+    }    
   }
   else {
+    //printf("Other");
     int fingerprint = hash((unsigned char*)packet, queue[queue_num].dma_len);
     // check if matches 
     for (int i = 0; i < spammers->length; ++i)
@@ -301,6 +308,7 @@ void handle_packet()
     }
   }
 }
+//print_stats();
   // HONEYPOT MUTEX UNLOCK
 // QUEUE MUTEX UNLOCK
 }
@@ -312,7 +320,7 @@ void network_poll()
     if (dev_net->rx_tail != dev_net->rx_head){
       // get the address of the packet
       unsigned int ring_num = (dev_net->rx_tail % dev_net->rx_capacity);
-
+/*
       struct honeypot_command_packet* temp_packet;
       temp_packet = (struct honeypot_command_packet *)ring[ring_num].dma_base;
  
@@ -336,11 +344,11 @@ void network_poll()
       packet->headers.udp_checksum = temp_packet->headers.udp_checksum;
       packet->secret_big_endian = temp_packet->secret_big_endian;
       packet->cmd_big_endian = temp_packet->cmd_big_endian;
-      packet->data_big_endian = temp_packet->data_big_endian;
+      packet->data_big_endian = temp_packet->data_big_endian; */
       // enqueue this packet
       if (stats_queue->rx_tail != (stats_queue->rx_head-1))
       {
-        queue[stats_queue->rx_head].dma_base = virtual_to_physical(packet);
+        queue[stats_queue->rx_head].dma_base = ring[ring_num].dma_base;//virtual_to_physical(packet);
         queue[stats_queue->rx_head].dma_len = ring[ring_num].dma_len;
         stats_queue->rx_head = (stats_queue->rx_head+1) % stats_queue->rx_capacity;
       }
@@ -349,18 +357,19 @@ void network_poll()
       // store packet statistics
       packets_so_far++;
       packets_interval++;
-      dev_net->cmd = NET_GET_DROPCOUNT;
-      drop_count += dev_net->data;
+      bytes_interval += ring[ring_num].dma_len;
       double time_since_boot = (double) current_cpu_cycles() / CPU_CYCLES_PER_SECOND;
-      if (time_since_boot - num_seconds > 10.0)
+      if (time_since_boot - num_seconds > 1.0)
       {
-        transfer_rate = packets_interval / (time_since_boot - num_seconds);
+        int mbits = (4*bytes_interval) / 1000000;
+        transfer_rate = mbits / (time_since_boot - num_seconds);
         packets_interval = 0;
+        bytes_interval = 0;
       }
       // STATISTICS MUTEX UNLOCK
       
-      printf("Packets so far:%d\tDropped packets:%d\tTransfer rate:%f\n", 
-        packets_so_far, drop_count, transfer_rate);
+      //printf("Packets so far:%d\tDropped packets:%d\tTransfer rate:%f\n", 
+      //  packets_so_far, drop_count, transfer_rate);
 
       ring[ring_num].dma_len = BUFFER_SIZE;
       dev_net->rx_tail = (dev_net->rx_tail+1) % dev_net->rx_capacity;
@@ -370,9 +379,6 @@ void network_poll()
   }
 }
 
-
-
-
 unsigned short to_little_endian(unsigned short x)
 {
   unsigned short valueShifted = (x>>8) | (x<<8);
@@ -381,8 +387,14 @@ unsigned short to_little_endian(unsigned short x)
 
 void print_stats()
 {
-  //printf("Packets so far:%d\tDropped packets:%d\tTransfer rate:%f\n", 
-  //  packets_so_far, drop_count, transfer_rate);
+  double time_since_boot = (double) current_cpu_cycles() / CPU_CYCLES_PER_SECOND;
+  dev_net->cmd = NET_GET_DROPCOUNT;
+  int drop_count = dev_net->data;
+  double drop_rate = (drop_count*NET_MINPKT*4) / (1000000*time_since_boot);
+  printf("time since boot: %d cycles (%f sec) packets: %d recent: %d (%f Mbits/s) drops: %d (%f Mbits/s)",
+    current_cpu_cycles(), time_since_boot, packets_so_far, packets_interval, transfer_rate, drop_count, drop_rate);
+  printf("Packets so far:%d\tDropped packets:%d\tTransfer rate:%f\n", 
+    packets_so_far, drop_count, transfer_rate);
   printf("Num spammers:%d\tNum evils:%d\tNum vulnerables:%d\n", spammers->length, evils->length, vulnerables->length);
 }
 
