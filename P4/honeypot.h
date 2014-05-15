@@ -1,6 +1,5 @@
 #ifndef HONEYPOT_H_
 #define HONEYPOT_H_
-
 /*
  * Honeypot command packets have the following format.
  *
